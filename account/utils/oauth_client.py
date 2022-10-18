@@ -36,6 +36,5 @@ class ShopifyOauthClient:
             f"https://{self.shop_name}{ShopifyOauth.AUTHORIZE_ENDPOINT}?"
             f"client_id={ShopifyOauth.API_KEY}&scope={ShopifyOauth.SCOPES}"
             f"&redirect_uri={host}{ShopifyOauth.REDIRECT_ENDPOINT}"
-            f"&grant_options[]={ShopifyOauth.ACCESS_MODE}"
         )
         return redirect_url

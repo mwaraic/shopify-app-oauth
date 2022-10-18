@@ -10,16 +10,16 @@ class ShopifyOauthSerializer(serializers.Serializer):
     host = serializers.CharField(required=False)
     shop = serializers.CharField(required=True)
     timestamp = serializers.CharField(required=True)
+    session = serializers.CharField(required=False)
 
-    def check_signature(self, attrs):   
-        "Checking siganture for each request from Shopify"
+    def check_signature(self, attrs):
         secret = ShopifyOauth.SECRET_KEY
-        if attrs.get('code'):
-            msg = (f"code={attrs['code']}&host={attrs['host']}"
-                   f"&shop={attrs['shop']}&timestamp={attrs['timestamp']}")
-        else:
-            msg = f"shop={attrs['shop']}&timestamp={attrs['timestamp']}"
-        is_verified = verify_hash_signature(secret, msg, attrs['hmac'])
+        hmac = attrs.pop('hmac')
+        line = '&'.join([
+                        '%s=%s' % (key, value)
+                        for key, value in sorted(attrs.items())
+                        ])
+        is_verified = verify_hash_signature(secret, line, hmac)
         if not is_verified:
             raise serializers.DjangoValidationError(
                 {'signature': ["Signature is not valid"]}
@@ -33,10 +33,6 @@ class ShopifyOauthSerializer(serializers.Serializer):
                 {'shop_name': ["Shop name does not end with 'myshopify.com'"]}
             )
         return shop_url
-
-    def validate(self, attrs):
-        self.check_signature(attrs)
-        return attrs
 
 
 class ShopifyUserCreationSerializer(serializers.Serializer):

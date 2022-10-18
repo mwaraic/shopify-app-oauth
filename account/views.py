@@ -31,27 +31,6 @@ class ShopifyUserCreationAPIView(GenericAPIView):
 
     def get(self, request):
         serializer = self.get_serializer(data=request.query_params)
-        if serializer.is_valid(raise_exception=True):
-            shop_name = serializer.validated_data['shop']
-            oauth_client = ShopifyOauthClient(shop_name)
-            token = oauth_client.get_access_token(
-                client_id=ShopifyOauth.API_KEY,
-                client_secret=ShopifyOauth.SECRET_KEY,
-                code=serializer.validated_data['code']
-            )
-            email, owner = oauth_client.get_shop_details()
-            serializer = ShopifyUserCreationSerializer(
-                data={
-                    "email": email,
-                    "full_name": owner,
-                    "shop_name": shop_name,
-                    'token': token,
-                    'state': request.query_params.get("state")
-                }
-            )
-            if serializer.is_valid(raise_exception=True):
-                user = serializer.create(validated_data=serializer.validated_data)
-                bridge_url = f"https://{shop_name}/admin/apps/testapp"
-                return HttpResponseRedirect(redirect_to=bridge_url)
 
-        return Response({"message": "Authentication failed"})
+        return HttpResponseRedirect(redirect_to='http://localhost:8000/accounts/shopify/login/?shop=birds-eye-global&process=login&next=%2Fsignup')
+                
